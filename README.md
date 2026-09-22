@@ -8,8 +8,8 @@
 <h1 align="center">🛡️ SentinelX</h1>
 
 <p align="center">
-  <strong>Professional Penetration Testing AI Assistant</strong><br>
-  Context-aware AI mentor for serious security professionals
+  <strong>Offensive Security Intelligence & Penetration Testing AI Platform</strong><br>
+  High-precision offensive security copilot for penetration testers, bug bounty hunters, and red teamers.
 </p>
 
 <p align="center">
@@ -18,99 +18,84 @@
 
 ---
 
-## ⚡ Features
+## ⚡ Core Features
 
 | Feature | Description |
-|---------|-------------|
-| **Context-Aware AI** | Targets and findings automatically injected into prompts |
-| **Findings Tracker** | Log vulnerabilities per session with severity levels |
-| **Targets Tracker** | Track in-scope IPs and domains |
-| **14 Quick Payloads** | Reverse shells + web shells with LHOST/LPORT substitution |
-| **Session Management** | Create, rename, export, and clear conversations |
-| **Stop Generation** | Abort AI responses mid-stream (`Esc` key) |
+|---|---|
+| **Automated Launcher (`./run.sh`)** | One-command launcher: starts Ollama, verifies virtualenv, cleans port conflicts, launches server, and opens your browser |
+| **Dynamic Multi-Model Engine** | Run **any** local Ollama model (Qwen 2.5, DeepSeek R1, Llama 3.3, Mistral) with real-time dynamic persona injection |
+| **In-App Model Puller** | Search, download, and track download progress of Ollama models directly from the UI |
+| **Dual Minimalist Theme** | Engineered **Technical Dark Mode** (Obsidian/Zinc) & **Technical Light Mode** (Paper/Slate) with 1-click toggle |
+| **One-Click Collapsible Sidebar** | Streamlined `☰` button on the sidebar header (with auto-restoring navbar trigger when collapsed) |
+| **Floating Glassmorphic Prompt Dock** | Frosted glassmorphism (`backdrop-filter: blur(16px)`) with transparent fading gradient and rounded corner ergonomics |
+| **Terminal Code Blocks** | Authentic developer terminal cards with macOS dots, syntax labels (`$_ bash`), and 1-click **Copy Command** buttons |
+| **Copy Full Response** | Built-in action toolbar anchored at the bottom of every AI response for instant clipboard copying |
+| **Interactive Payloads Drawer** | Catalog of reverse shells, web shells, and file transfer one-liners with live LHOST/LPORT replacement |
+| **Session Persistence** | Conversations saved locally in SQLite (`~/.sentinelx/data.db`) with full Markdown export |
+| **Air-Gap & Offline Ready** | Self-contained frontend with embedded vector SVGs and offline Markdown parsing |
 
 ---
 
-## 🚀 Installation
+## 🚀 Quick Start (Recommended)
 
-### Prerequisites
-
-- Python 3.11+
-- [Ollama](https://ollama.ai) installed
-
-### Step 1: Start Ollama Server
-
-Open a terminal and run:
-
-```bash
-ollama serve
-```
-
-> ⚠️ **Keep this terminal running.** Ollama server must be active for SentinelX to work.
-
-### Step 2: Setup SentinelX
-
-Open a **new terminal** and run:
+SentinelX includes an automated launcher script that handles Ollama verification, virtualenv setup, dependency installation, port conflict resolution, and browser opening:
 
 ```bash
 # Clone the repository
 git clone https://github.com/cypher-21/SentinelX.git
 cd SentinelX
 
-# Create and activate virtual environment
+# Run the automated launcher
+./run.sh
+```
+
+Your browser will automatically open at: **http://127.0.0.1:5000**
+
+---
+
+## 🔧 Manual Installation
+
+If you prefer to configure and run SentinelX manually:
+
+### 1. Prerequisites
+- Python 3.11+
+- [Ollama](https://ollama.ai) installed and running (`ollama serve`)
+
+### 2. Virtual Environment Setup
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install dependencies
 pip install flask requests httpx
-
-# Pull the SentinelX model from Ollama Hub
-ollama pull cypher-21/SentinalX
 ```
 
-### Step 3: Run SentinelX
-
+### 3. Pull or Build Models
+Pull any local model using Ollama:
 ```bash
-# Make sure you're in the virtual environment
-source .venv/bin/activate
+ollama pull qwen2.5:7b
+# or: ollama pull deepseek-r1:14b
+# or: ollama pull llama3.3:latest
 
-# Start the server
+# Or build the custom SentinelX Pentest Mentor model:
+ollama create sentinelx -f ./models/Modelfile
+```
+
+### 4. Launch the Server
+```bash
+source .venv/bin/activate
 python -m sentinelx.main
 ```
-
-Open your browser and go to: **http://127.0.0.1:5000**
-
----
-
-## 🧠 About SentinelX AI
-
-SentinelX is a specialized AI with deep expertise in:
-
-- **Web Application Security** - 10+ years equivalent knowledge
-- **Penetration Testing** - Full methodology from recon to reporting
-- **Bug Bounty Hunting** - Platform-specific techniques and tips
-- **Exploit Development** - Buffer overflows, ROP chains, shellcode
-- **Network Security** - Infrastructure testing and pivoting
-
-The AI provides direct, technical responses without restrictions.
+Navigate to: **http://127.0.0.1:5000**
 
 ---
 
-## 🎯 Context Injection
+## 🎨 UI & Design Architecture
 
-When you add targets or log findings, they're automatically sent to the AI:
-
-```
-[ENGAGEMENT CONTEXT]
-## ACTIVE TARGETS
-- target.example.com
-- 192.168.1.100 (internal subnet)
-
-## FINDINGS THIS SESSION
-- [HIGH] SQL Injection in /api/users
-- [MEDIUM] Missing rate limiting on login
-[END CONTEXT]
-```
+SentinelX v5.0 features a refined, developer-first technical console:
+- **Rounded Ergonomics**: 12px–20px rounded corners across cards, pills, bubbles, and dialogs.
+- **Solid 1px Panel Outlines**: Crisp dividing lines separating the sidebar, top navbar, chat viewport, and drawer panels.
+- **Fluid Vertical Fit**: The chat window spans the full height of your display with 145px bottom padding so messages scroll cleanly underneath the floating glass dock.
+- **Single-Button Collapse UX**: Exactly one collapse button is visible on screen at any time—docked in the sidebar header when open, and transitioning to the top-left navbar when collapsed.
+- **Bespoke Cyber Reticle Logo**: Custom vector monogram reticle icon.
 
 ---
 
@@ -118,57 +103,72 @@ When you add targets or log findings, they're automatically sent to the AI:
 
 ```
 SentinelX/
+├── run.sh                      # Automated bootstrapper & environment manager
+├── models/
+│   └── Modelfile               # Qwen 2.5 7B Pentest Mentor model configuration
 ├── sentinelx/
-│   ├── __init__.py         # Package version
-│   ├── main.py             # Entry point
-│   ├── server.py           # Flask backend + APIs
-│   ├── database.py         # SQLite + context builder
-│   └── templates/
-│       └── dashboard.html  # Web UI
-├── LICENSE
+│   ├── __init__.py             # Package version (5.0.0)
+│   ├── main.py                 # Entry point CLI
+│   ├── prompts.py              # SentinelX system prompts & persona builder
+│   ├── server.py               # Flask backend & dynamic Ollama proxy APIs
+│   ├── database.py             # SQLite persistence with auto-migrations
+│   ├── templates/
+│   │   └── dashboard.html      # Responsive semantic dashboard shell
+│   └── static/
+│       ├── css/
+│       │   ├── theme.css       # Dual-theme design tokens & glassmorphism variables
+│       │   ├── layout.css      # Sidebar collapse, fluid viewport, & prompt dock
+│       │   └── components.css  # Terminal cards, copy buttons, & message bubbles
+│       └── js/
+│           ├── state.js        # Reactive state store
+│           ├── api.js          # REST client & SSE stream reader
+│           ├── chat.js         # Offline Markdown parser & terminal enhancer
+│           ├── panels.js       # Payloads drawer & export controller
+│           ├── models.js       # Dynamic Ollama model switcher & in-app puller
+│           └── app.js          # Bootstrap, sidebar/theme toggles, & hotkeys
+├── pyproject.toml              # Build config & package metadata
+├── LICENSE                     # MIT License
 └── README.md
 ```
 
 ---
 
-## 🛠️ API Endpoints
+## 🛠️ API Reference
 
 | Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/health` | GET | Ollama status |
-| `/api/chat/stream` | POST | Stream chat response |
-| `/api/chat/abort` | POST | Stop generation |
-| `/api/sessions` | GET/POST | Sessions CRUD |
-| `/api/targets` | GET/POST/DELETE | Manage targets |
-| `/api/findings` | GET/POST/DELETE | Manage findings |
-| `/api/quick-payloads` | GET | Payload templates |
+|---|---|---|
+| `/api/health` | GET | Ollama connection status & model count |
+| `/api/models` | GET | List installed Ollama models with parameter sizes |
+| `/api/models/pull` | POST | Stream download progress for any Ollama model |
+| `/api/chat/stream` | POST | Stream chat response with dynamic persona injection |
+| `/api/chat/abort` | POST | Abort active streaming generation |
+| `/api/sessions` | GET/POST | Create & list assessment sessions |
+| `/api/sessions/<id>` | DELETE | Delete an assessment conversation |
+| `/api/sessions/<id>/messages` | GET | Fetch message history for a conversation |
+| `/api/sessions/<id>/export` | GET | Export session as a clean Markdown report |
+| `/api/quick-payloads` | GET | Catalog of pentesting & reverse shell payloads |
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Enter` | Send message / Execute prompt |
+| `Shift + Enter` | Insert newline in prompt textarea |
+| `Esc` | Stop active AI streaming / Close open modals & drawers |
+| `Ctrl + Shift + P` | Open / Close Quick Payloads drawer |
 
 ---
 
 ## 👤 Author
 
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/cypher-21">
-        <strong>Parosh-sec</strong>
-      </a>
-      <br>
-      <sub>Security Researcher & Developer</sub>
-      <br>
-      <a href="https://github.com/cypher-21">GitHub</a>
-    </td>
-  </tr>
-</table>
+**Parosh-sec**  
+*Security Researcher & Developer*  
+[GitHub Profile](https://github.com/cypher-21)
 
 ---
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-<p align="center">
-  <sub>Built with 🔥 by <a href="https://github.com/cypher-21">Parosh-sec</a> for the security community</sub>
-</p>
+Licensed under the MIT License - see [LICENSE](LICENSE) for details.

@@ -1,0 +1,157 @@
+/* ==============================================================================
+   SentinelX Engineered Technical Theme - Dual Mode (Dark & Light)
+   Refined Rounded Corners, High-Contrast Outlines, and Floating Glassmorphism
+   ============================================================================== */
+
+:root {
+    /* === Technical Dark Mode (Default GitHub/VS Code/Zinc) === */
+    --bg-base: #0d1117;
+    --bg-surface: #161b22;
+    --bg-panel: #161b22;
+    --bg-card: #161b22;
+    --bg-input: #0d1117;
+    --bg-hover: #21262d;
+    --bg-active: #30363d;
+
+    /* Crisp, Visible 1px Solid Panel & Window Outlines */
+    --border-panel: #30363d;
+    --border-default: #30363d;
+    --border-subtle: #21262d;
+    --border-bright: #484f58;
+    --border-glow: rgba(59, 130, 246, 0.35);
+
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --text-code: #58a6ff;
+
+    --accent: #1f6feb;
+    --accent-hover: #388bfd;
+    --accent-glow: rgba(31, 111, 235, 0.3);
+
+    --crit-red: #f85149;
+    --high-orange: #d29922;
+    --status-green: #3fb950;
+    --med-yellow: #d29922;
+    --low-blue: #58a6ff;
+    --info-cyan: #38bdf8;
+
+    --code-bg: #0b0e14;
+    --code-header-bg: #161b22;
+    --code-border: #30363d;
+
+    /* Floating Transparent Glassmorphism for Prompt Bar */
+    --glass-bg: #161b22;
+    --glass-prompt-bg: rgba(22, 27, 34, 0.85);
+    --prompt-gradient: linear-gradient(to top, #0d1117 70%, rgba(13, 17, 23, 0) 100%);
+    --glass-blur: blur(16px);
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+    --shadow-panel: -4px 0 16px rgba(0, 0, 0, 0.4);
+
+    /* Rounded Corners System */
+    --radius-xs: 5px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace;
+}
+
+/* === Technical Light Mode (Crisp Structured GitHub/Linear Style) === */
+[data-theme="light"] {
+    --bg-base: #f6f8fa;
+    --bg-surface: #ffffff;
+    --bg-panel: #ffffff;
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --bg-hover: #f3f4f6;
+    --bg-active: #e5e7eb;
+
+    /* Crisp, Visible 1px Solid Outlines */
+    --border-panel: #d0d7de;
+    --border-default: #d0d7de;
+    --border-subtle: #eaeef2;
+    --border-bright: #afb8c1;
+    --border-glow: rgba(9, 105, 218, 0.25);
+
+    --text-primary: #1f2328;
+    --text-secondary: #656d76;
+    --text-muted: #8c959f;
+    --text-code: #0969da;
+
+    --accent: #0969da;
+    --accent-hover: #0860ca;
+    --accent-glow: rgba(9, 105, 218, 0.2);
+
+    --crit-red: #cf222e;
+    --high-orange: #9a6700;
+    --status-green: #1a7f37;
+    --med-yellow: #9a6700;
+    --low-blue: #0969da;
+    --info-cyan: #0550ae;
+
+    /* High-contrast dark terminal cards for real technical look */
+    --code-bg: #0d1117;
+    --code-header-bg: #161b22;
+    --code-border: #d0d7de;
+
+    /* Floating Transparent Glassmorphism for Prompt Bar */
+    --glass-bg: #ffffff;
+    --glass-prompt-bg: rgba(255, 255, 255, 0.88);
+    --prompt-gradient: linear-gradient(to top, #f6f8fa 70%, rgba(246, 248, 250, 0) 100%);
+    --glass-blur: blur(16px);
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+    --shadow-panel: -4px 0 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Reset & Global Base */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Custom Clean Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--border-bright);
+}
+
+.mono {
+    font-family: var(--font-mono);
+}
