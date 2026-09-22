@@ -22,9 +22,10 @@
 
 | Feature | Description |
 |---|---|
-| **Automated Launcher (`./run.sh`)** | One-command launcher: starts Ollama, verifies virtualenv, cleans port conflicts, launches server, and opens your browser |
+| **Automated Launcher (`./run.sh`)** | One-command launcher: starts Ollama, verifies virtualenv, cleans port conflicts, launches server, opens browser, and gracefully shuts down all processes on `Ctrl+C` |
 | **Dynamic Multi-Model Engine** | Run **any** local Ollama model (Qwen 2.5, DeepSeek R1, Llama 3.3, Mistral) with real-time dynamic persona injection |
 | **In-App Model Puller** | Search, download, and track download progress of Ollama models directly from the UI |
+| **Clear All History & Reset** | One-click button to permanently wipe chat sessions and database records (`~/.sentinelx/data.db`) with SQLite `VACUUM` |
 | **Dual Minimalist Theme** | Engineered **Technical Dark Mode** (Obsidian/Zinc) & **Technical Light Mode** (Paper/Slate) with 1-click toggle |
 | **One-Click Collapsible Sidebar** | Streamlined `☰` button on the sidebar header (with auto-restoring navbar trigger when collapsed) |
 | **Floating Glassmorphic Prompt Dock** | Frosted glassmorphism (`backdrop-filter: blur(16px)`) with transparent fading gradient and rounded corner ergonomics |
@@ -51,40 +52,111 @@ cd SentinelX
 
 Your browser will automatically open at: **http://127.0.0.1:5000**
 
+> **Graceful Shutdown**: When you are finished, simply press `Ctrl+C` in your terminal. `run.sh` will cleanly stop the Flask web server, release port 5000, and terminate the Ollama background daemon and model runners (`ollama_llama_server`), ensuring zero orphaned processes lingering on your system.
+
 ---
 
-## 🔧 Manual Installation
+## 🔧 Step-by-Step Manual Installation & Setup Guide
 
-If you prefer to configure and run SentinelX manually:
+If you prefer to configure and run SentinelX step-by-step without using the `./run.sh` automated launcher:
 
-### 1. Prerequisites
-- Python 3.11+
-- [Ollama](https://ollama.ai) installed and running (`ollama serve`)
+### 1. System Prerequisites
 
-### 2. Virtual Environment Setup
+Ensure you have the required runtimes and tools installed on your operating system:
+
+- **Python 3.11+**:
+  ```bash
+  python3 --version
+  ```
+- **Ollama**: Local LLM execution engine.
+  - **Linux / WSL2**:
+    ```bash
+    curl -fsSL https://ollama.com/install.sh | sh
+    ```
+  - **macOS**: Download from [ollama.com/download](https://ollama.com/download) or run `brew install ollama`.
+  - **Windows**: Download the Windows installer from [ollama.com](https://ollama.com).
+
+---
+
+### 2. Start & Verify Ollama Service
+
+Ollama runs as a background service listening on `http://localhost:11434`.
+
+1. **Start the Ollama daemon**:
+   ```bash
+   ollama serve
+   ```
+   *(Keep this terminal open, or run in the background using `systemctl --user start ollama` or `nohup ollama serve > /dev/null 2>&1 &`)*
+
+2. **Verify that the Ollama API is active**:
+   ```bash
+   curl -s http://localhost:11434/api/tags
+   ```
+   If this outputs a JSON structure (e.g., `{"models":[]}`), Ollama is ready to process queries.
+
+---
+
+### 3. Pull or Build Recommended Models
+
+Download local LLMs tailored for cybersecurity analysis, offensive scripting, and reasoning:
+
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install flask requests httpx
-```
-
-### 3. Pull or Build Models
-Pull any local model using Ollama:
-```bash
+# General Offensive Security & Code Exploitation (Recommended)
 ollama pull qwen2.5:7b
-# or: ollama pull deepseek-r1:14b
-# or: ollama pull llama3.3:latest
 
-# Or build the custom SentinelX Pentest Mentor model:
+# Deep Analytical Reasoning & Vulnerability Assessment
+ollama pull deepseek-r1:14b
+
+# Fast, Lightweight Triage
+ollama pull llama3.2:3b
+
+# Build the tailored SentinelX Pentest Mentor custom model:
 ollama create sentinelx -f ./models/Modelfile
 ```
 
-### 4. Launch the Server
+---
+
+### 4. Clone Repository & Setup Virtual Environment
+
 ```bash
+# 1. Clone the repository
+git clone https://github.com/cypher-21/SentinelX.git
+cd SentinelX
+
+# 2. Create Python virtual environment
+python3 -m venv .venv
+
+# 3. Activate virtual environment
+# On Linux / macOS:
 source .venv/bin/activate
+# On Windows (cmd):
+# .venv\Scripts\activate.bat
+# On Windows (PowerShell):
+# .venv\Scripts\Activate.ps1
+
+# 4. Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+# (Alternatively: pip install -e .)
+```
+
+---
+
+### 5. Launch the Platform
+
+```bash
+# Ensure virtual environment is active
+source .venv/bin/activate
+
+# Start the Flask web application
 python -m sentinelx.main
 ```
-Navigate to: **http://127.0.0.1:5000**
+
+Once running, open your web browser and navigate to:
+```
+http://127.0.0.1:5000
+```
+To stop the server at any time, press `Ctrl+C` in your terminal.
 
 ---
 
@@ -146,6 +218,7 @@ SentinelX/
 | `/api/sessions/<id>` | DELETE | Delete an assessment conversation |
 | `/api/sessions/<id>/messages` | GET | Fetch message history for a conversation |
 | `/api/sessions/<id>/export` | GET | Export session as a clean Markdown report |
+| `/api/history/clear` | POST, DELETE | Clear all assessment history & reset SQLite database |
 | `/api/quick-payloads` | GET | Catalog of pentesting & reverse shell payloads |
 
 ---

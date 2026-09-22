@@ -171,6 +171,16 @@ def api_clear_messages(session_id):
     return jsonify({"success": True})
 
 
+@app.route('/api/history/clear', methods=['POST', 'DELETE'])
+def api_clear_history():
+    """Clear all chat sessions and database history."""
+    try:
+        db.clear_all_history()
+        return jsonify({"success": True, "message": "All chat history and database records cleared."})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 # ============ Chat Streaming Engine ============
 
 @app.route('/api/chat/stream', methods=['POST'])

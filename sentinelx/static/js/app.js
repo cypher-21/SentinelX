@@ -95,6 +95,30 @@ const App = {
             });
         }
 
+        // Clear All History Button
+        const clearHistoryBtn = document.getElementById('btn-clear-history');
+        if (clearHistoryBtn) {
+            clearHistoryBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (!confirm('Are you sure you want to permanently clear all assessment conversations and chat history from the database? This cannot be undone.')) {
+                    return;
+                }
+                try {
+                    const res = await API.clearAllHistory();
+                    if (res.success) {
+                        this.showToast('All chat history cleared.', 'success');
+                        AppState.currentSessionId = null;
+                        AppState.sessions = [];
+                        await this.createNewSession('New Assessment');
+                    } else {
+                        this.showToast(res.error || 'Failed to clear history.', 'error');
+                    }
+                } catch (err) {
+                    this.showToast('Error communicating with server.', 'error');
+                }
+            });
+        }
+
         // Global Keyboard Shortcuts
         document.addEventListener('keydown', (e) => {
             // Esc stops active generation or closes open drawers/modals

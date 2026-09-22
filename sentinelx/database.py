@@ -300,11 +300,23 @@ def delete_finding(finding_id: int):
         conn.execute("DELETE FROM findings WHERE id = ?", (finding_id,))
 
 
-# ============ Context Generation ============
+# ============ Database Wipe / History Reset ============
 
-def build_context(session_id: Optional[str] = None) -> str:
-    """Legacy context builder - returns empty string."""
-    return ""
+def clear_all_history():
+    """Clear all chat sessions, messages, and assessment records from the database."""
+    with get_db() as conn:
+        conn.execute("DELETE FROM messages")
+        conn.execute("DELETE FROM sessions")
+        conn.execute("DELETE FROM findings")
+        conn.execute("DELETE FROM targets")
+
+    # SQLite VACUUM cannot run within a managed transaction; run in autocommit mode
+    try:
+        vac_conn = sqlite3.connect(DB_PATH, timeout=15.0, isolation_level=None)
+        vac_conn.execute("VACUUM")
+        vac_conn.close()
+    except Exception:
+        pass
 
 
 # Initialize schema on first import

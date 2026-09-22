@@ -548,6 +548,12 @@
     border-color: var(--border-bright);
 }
 
+.btn-clear-history:hover {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: var(--crit-red) !important;
+    border-color: rgba(239, 68, 68, 0.35) !important;
+}
+
 /* ============ Chat Viewport (Full Vertical Window Fit) ============ */
 .chat-container {
     flex: 1;

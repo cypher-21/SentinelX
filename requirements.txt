@@ -1,0 +1,5 @@
+flask>=3.0.0
+requests>=2.31.0
+ollama>=0.3.0
+rich>=13.7.0
+httpx>=0.26.0

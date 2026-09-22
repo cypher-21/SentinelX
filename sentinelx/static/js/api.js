@@ -102,6 +102,13 @@ const API = {
         return res.json();
     },
 
+    async clearAllHistory() {
+        const res = await fetch('/api/history/clear', {
+            method: 'POST'
+        });
+        return res.json();
+    },
+
     async streamChat({ sessionId, message, model, onChunk, onDone, onError }) {
         try {
             const controller = new AbortController();
